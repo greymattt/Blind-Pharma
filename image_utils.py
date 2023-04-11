@@ -51,6 +51,7 @@ def preprocess_image(img_name)->bool:
   if w<h:
         cropped_img=cv2.rotate(cropped_img,cv2.ROTATE_90_CLOCKWISE)
   cv2.imwrite(os.path.join('pre_process','processed',img_name),cropped_img)
+  print("Image saved: Input", img_name)
   return True
   
 def extract_text_from_image(image_name):

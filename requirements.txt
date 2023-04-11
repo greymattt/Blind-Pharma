@@ -1,6 +1,6 @@
 flask
 pillow
-numpypip
+numpy
 opencv-python
 azure-cognitiveservices-vision-computervision
 python-dotenv
