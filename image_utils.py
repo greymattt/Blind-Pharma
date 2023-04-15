@@ -24,7 +24,7 @@ def preprocess_image(img_name)->bool:
   mask = cv2.inRange(hsv, lower_violet, upper_violet)
 
   # Apply the mask to the original image
-  result = cv2.bitwise_and(img, img, mask=mask)
+  result = cv2.bitwise_and(img, img, mask=mask) 
 
   # Removing noise
   kernel = np.ones((3, 3), np.uint8)
@@ -41,7 +41,8 @@ def preprocess_image(img_name)->bool:
   if(x,y,w,h)==(0,0,0,0) or (w>500 and h>500):
       print("invalid image")
       return False
-  
+
+
   x,y,w,h=max(x-50,0),max(y-50,0),min(w+100,thresh.shape[1]-x),min(h+100,thresh.shape[0]-y)
 
   # Cropped image
@@ -79,6 +80,6 @@ def extract_text_from_image(image_name):
         for text_result in image_analysis.analyze_result.read_results:
             result='\n'.join(line.text for line in text_result.lines)
     
-    os.remove(os.path.join('pre_process','processed', image_name))
+    # os.remove(os.path.join('pre_process','processed', image_name))
     return {'content':result}
     pass
