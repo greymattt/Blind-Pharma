@@ -1,11 +1,9 @@
 from flask import Flask, request, jsonify
 from PIL import Image
-import numpy as np
 import uuid
 import os
 import base64
 from io import BytesIO
-from image_utils import preprocess_image, extract_text_from_image
 from azure.cognitiveservices.vision.computervision import ComputerVisionClient
 from azure.cognitiveservices.vision.computervision.models import OperationStatusCodes
 from azure.cognitiveservices.vision.computervision.models import VisualFeatureTypes
@@ -20,31 +18,28 @@ import time
 app = Flask(__name__)
 
 def extract(image_path):
+    # Azure stuffs
     subscription_key = os.environ.get('SUBSCRIPTION_KEY')
     endpoint = os.environ.get('ENDPOINT')
-
     computervision_client = ComputerVisionClient(endpoint, CognitiveServicesCredentials(subscription_key))
     print("======== DEBUG START ========")
     print(f"File: {image_path}")
-
     with open(image_path, "rb") as read_image:
         read_response = computervision_client.read_in_stream(read_image, raw=True)
-
     read_operation_location = read_response.headers["Operation-Location"]
     operation_id = read_operation_location.split("/")[-1]
-
     while True:
         read_result = computervision_client.get_read_result(operation_id)
         if read_result.status not in ['notStarted', 'running']:
             break
         time.sleep(1)
     print("Response received from server")
-
     string = ""
     if read_result.status == OperationStatusCodes.succeeded:
         for text_result in read_result.analyze_result.read_results:
             string += "\n".join([line.text for line in text_result.lines])
     print("String created")
+    
     # Search for the medicine name
     print(string)
     flag = False
@@ -64,26 +59,21 @@ def extract(image_path):
         desc = "Please take the picture again"
         print("Name and description not found")
 
-
+    # Search for the expiry date
     regex_pattern = r'\b(\d{2}/\d{4}|(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\.\d{4}|\b(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\d{4}|\b(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\.\d{2})\b'
-
     dates = re.findall(regex_pattern, string, re.IGNORECASE)
     print("Dates found:", dates)
-
     if len(dates) > 0:
         result = ' '.join([date[0] for date in dates])
         print(result)
         return {'date':result, 'name':name, 'desc':desc}
-
     print("Date not found")
     return {'date':"Date not found", 'name':name, 'desc':desc}
  
 
 @app.route('/ocr', methods=['POST'])
 def ocr():
-    print("Debug")
     data = request.get_json()
-    print("data")
     image_bytes = base64.b64decode(data['image'])
     image_buffer = BytesIO(image_bytes)
     img = Image.open(image_buffer)
@@ -93,17 +83,12 @@ def ocr():
     print("image path", image_path)
     img.save(image_path)
     print("Saved image")
-    # img_crop = preprocess_image(filename)
-    # if not img_crop:
-    #     os.remove(image_path)
-    #     return jsonify({'content':'not able to pre process image'})
     temp = jsonify(extract(image_path))
-    # os.remove(image_path)
     return temp
 
 
-@app.route('/dhiva', methods=['POST'])
-def dhiva():
+@app.route('/test', methods=['POST'])
+def test():
     print("Testing...")
     image = request.files['image']
     file_extension = os.path.splitext(image.filename)[1]
@@ -111,10 +96,8 @@ def dhiva():
     image_path = os.path.join('pre_process','input', filename)
     image.save(image_path)
     print("Image saved: ", image_path)
-    image=preprocess_image(filename)
     print("Image processed")
     temp = jsonify(extract(image_path))
-    # os.remove(image_path)
     return temp
 
 if __name__ == '__main__':
