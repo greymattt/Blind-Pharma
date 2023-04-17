@@ -28,6 +28,7 @@ def extract(image_path):
         read_response = computervision_client.read_in_stream(read_image, raw=True)
     read_operation_location = read_response.headers["Operation-Location"]
     operation_id = read_operation_location.split("/")[-1]
+    print("Operation ID:", operation_id)
     while True:
         read_result = computervision_client.get_read_result(operation_id)
         if read_result.status not in ['notStarted', 'running']:
@@ -71,6 +72,10 @@ def extract(image_path):
     return {'date':"Date not found", 'name':name, 'desc':desc}
  
 
+@app.route('/')
+def hello_world():
+    return 'Hello World'
+
 @app.route('/ocr', methods=['POST'])
 def ocr():
     data = request.get_json()
@@ -101,4 +106,4 @@ def test():
     return temp
 
 if __name__ == '__main__':
-    app.run(debug=False)
+    app.run(host='192.168.137.159', debug=False)
