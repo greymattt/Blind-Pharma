@@ -3,6 +3,7 @@ from PIL import Image
 import uuid
 import os
 import base64
+import openpyxl
 from io import BytesIO
 from azure.cognitiveservices.vision.computervision import ComputerVisionClient
 from azure.cognitiveservices.vision.computervision.models import OperationStatusCodes
@@ -19,8 +20,8 @@ app = Flask(__name__)
 
 def extract(image_path):
     # Azure stuffs
-    subscription_key = os.environ.get('SUBSCRIPTION_KEY')
-    endpoint = os.environ.get('ENDPOINT')
+    subscription_key = '71d8f74874ba47baaaa64b4018922366'
+    endpoint = 'https://blind-pharma.cognitiveservices.azure.com'
     computervision_client = ComputerVisionClient(endpoint, CognitiveServicesCredentials(subscription_key))
     print("======== DEBUG START ========")
     print(f"File: {image_path}")
@@ -76,6 +77,13 @@ def extract(image_path):
 def hello_world():
     return 'Hello World'
 
+@app.route('/text', methods=['POST'])
+def text():
+    print("Testtt")
+    file = request.files['keyname']
+    print("error")
+    return "Image Received"
+
 @app.route('/ocr', methods=['POST'])
 def ocr():
     data = request.get_json()
@@ -96,9 +104,9 @@ def ocr():
 def test():
     print("Testing...")
     image = request.files['image']
-    file_extension = os.path.splitext(image.filename)[1]
-    filename = str(uuid.uuid4()) + file_extension
+    filename = str(uuid.uuid4()) + '.jpeg'
     image_path = os.path.join('pre_process','input', filename)
+    print(image_path)
     image.save(image_path)
     print("Image saved: ", image_path)
     print("Image processed")
@@ -106,4 +114,4 @@ def test():
     return temp
 
 if __name__ == '__main__':
-    app.run(host='192.168.137.159', debug=False)
+    app.run(debug=False)
