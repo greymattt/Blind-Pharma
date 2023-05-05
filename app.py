@@ -20,8 +20,8 @@ app = Flask(__name__)
 
 def extract(image_path):
     # Azure stuffs
-    subscription_key = '71d8f74874ba47baaaa64b4018922366'
-    endpoint = 'https://blind-pharma.cognitiveservices.azure.com'
+    subscription_key = ''
+    endpoint = ''
     computervision_client = ComputerVisionClient(endpoint, CognitiveServicesCredentials(subscription_key))
     print("======== DEBUG START ========")
     print(f"File: {image_path}")
@@ -99,19 +99,30 @@ def ocr():
     temp = jsonify(extract(image_path))
     return temp
 
-
 @app.route('/test', methods=['POST'])
 def test():
     print("Testing...")
     image = request.files['image']
-    filename = str(uuid.uuid4()) + '.jpeg'
+    filename = str(uuid.uuid4()) + ".jpeg"
     image_path = os.path.join('pre_process','input', filename)
-    print(image_path)
     image.save(image_path)
     print("Image saved: ", image_path)
     print("Image processed")
     temp = jsonify(extract(image_path))
     return temp
+
+# @app.route('/test', methods=['POST'])
+# def test():
+#     print("Testing...")
+#     image = request.files['image']
+#     filename = str(uuid.uuid4()) + '.jpeg'
+#     image_path = os.path.join('pre_process','input', filename)
+#     print(image_path)
+#     image.save(image_path)
+#     print("Image saved: ", image_path)
+#     print("Image processed")
+#     temp = jsonify(extract(image_path))
+#     return temp
 
 if __name__ == '__main__':
     app.run(debug=False)
