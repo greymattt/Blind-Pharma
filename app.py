@@ -46,7 +46,7 @@ def extract(image_path):
     print(string)
     flag = False
     string = string.lower()
-    df = pd.read_excel('/Users/greymatt/Developer/github/Blind-Pharma/med.xlsx', engine='openpyxl')
+    df = pd.read_excel('med.xlsx', engine='openpyxl')
     df.iloc[:, 1] = df.iloc[:, 1].str.lower()
     for i, row in df.iterrows():
         words = row[1].split()
